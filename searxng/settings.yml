@@ -1,10 +1,12 @@
 use_default_settings:
   engines:
     keep_only:
+      - brave
       - duckduckgo
 server:
   secret_key: "101HelloWorld"
   bind_address: "[::]"
+  limiter: true
 search:
   safe_search: 0
   autocomplete: ""
