@@ -31,8 +31,9 @@
   </header>
   <div id="chat" class="flex-1 overflow-y-auto p-6 space-y-4"></div>
   <form id="form" class="p-4 bg-slate-900 flex gap-2">
-    <input type="text" id="input" autocomplete="off" required
+    <textarea id="input" autocomplete="off" rows="10" cols="200" required
       class="flex-1 bg-slate-800 rounded-lg px-4 py-3 text-white outline-none" placeholder="Ask anything...">
+    </textarea>
     <button type="submit" class="bg-blue-700 hover:bg-blue-600 rounded-lg px-6 py-3">Send</button>
   </form>
   <script>
