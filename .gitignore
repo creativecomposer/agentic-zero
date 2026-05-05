@@ -1,4 +1,5 @@
 .DS_STORE
+qdrant_storage
 node_modules
 __pycache__
 scripts/flow/*/.flowconfig
