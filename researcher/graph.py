@@ -43,6 +43,7 @@ def call_model(state: AgentState, config: RunnableConfig) -> dict:
 
 
 def plan_research(state: AgentState):
+    console.print("[grey]--- Planning the research ---[/grey]")
     messages = [
         {"role": "system", "content": PLAN_PROMPT.format(
             question=state["question"])},
@@ -70,6 +71,7 @@ def plan_research(state: AgentState):
 
 
 async def execute_search(state: AgentState):
+    console.print("[grey]--- Executing search ---[/grey]")
     tasks = [search_web(step) for step in state["plan_steps"][:5]]
     all_results = await asyncio.gather(*tasks)
     flat_results = [item.model_dump()
@@ -79,6 +81,7 @@ async def execute_search(state: AgentState):
 
 
 async def fetch_sources(state: AgentState):
+    console.print("[grey]--- Fetching sources ---[/grey]")
     urls = [r["url"] for r in state["search_results"][:8]]
     pages = [fetch_page(url) for url in urls]
     texts = await asyncio.gather(*pages, return_exceptions=True)
@@ -92,6 +95,7 @@ async def fetch_sources(state: AgentState):
 
 
 def extract_claims(state: AgentState):
+    console.print("[grey]--- Extracting the claims ---[/grey]")
     claims = []
     for i, src in enumerate(state["source_texts"]):
         messages = [{"role": "system", "content": EXTRACT_CLAIMS_PROMPT.format(text=src["text"])},
@@ -117,6 +121,7 @@ def extract_claims(state: AgentState):
 
 
 def check_conflicts(state: AgentState) -> Literal["verify_claims", "synthesize_report"]:
+    console.print("[grey]--- Checking for conflicts ---[/grey]")
     # Simplified conflict detection
     if len(state["extracted_claims"]) > 8:
         return "verify_claims"
@@ -126,6 +131,7 @@ def check_conflicts(state: AgentState) -> Literal["verify_claims", "synthesize_r
 
 
 async def synthesize_report(state: AgentState):
+    console.print("[grey]--- Sythesizeing report ---[/grey]")
     context = "\n\n".join([
         "Sources:", *[f"{i}: {s['url']}" for i,
                       s in enumerate(state["source_texts"])],
@@ -148,6 +154,7 @@ async def synthesize_report(state: AgentState):
 
 
 async def fact_check_report(state: AgentState):
+    console.print("[grey]--- Fact checking the report ---[/grey]")
     messages = [
         {"role": "system", "content": CRITIC_PROMPT},
         {"role": "user", "content": f"Report:\n{state['final_report']}\n\nSources:\n{
@@ -199,5 +206,5 @@ async def run_research(question: str, thread_id: str = "default"):
 
 
 if __name__ == "__main__":
-    q = "What is the current status of local inference speed records for 405B-class models as of December 2025?"
+    q = "What is the best way to configure opencode with llama.cpp?"
     asyncio.run(run_research(q))

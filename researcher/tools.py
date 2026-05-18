@@ -5,7 +5,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, validator
 from requests_html import AsyncHTMLSession
 from bs4 import BeautifulSoup
-import markdownify
+from markdownify import MarkdownConverter
 
 
 session = AsyncHTMLSession()
@@ -40,9 +40,10 @@ class WriteFile(BaseModel):
 
 
 async def search_web(query: str, num_results: int = 8) -> list[SearchResult]:
+    headers = {"X-Forwarded-For": "192.168.1.166"}
     params = {"q": query, "format": "json", "engines": "ddg"}
     try:
-        resp = httpx.get(f"http://127.0.0.1:8081/search",
+        resp = httpx.get(f"http://127.0.0.1:8081/search", headers=headers,
                          params=params, timeout=20.0)
     except:
         return []
@@ -62,9 +63,8 @@ async def fetch_page(url: str) -> str:
         soup = BeautifulSoup(r.html.raw_html, "lxml")
         for tag in soup(["script", "style", "nav", "header", "footer", "aside"]):
             tag.decompose()
-        text = soup.get_text(separator="\n")
-        markdown = markdownify.markdownify(text, heading_style="ATX")
-        return markdown[:120000]  # truncae to roughly 30k tokens
+        markdown = MarkdownConverter(heading_style="ATX").convert_soup(soup)
+        return markdown[:50000]
     except Exception as e:
         return f"Error fetching {url}: {str(e)}"
 
